@@ -1,0 +1,74 @@
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE / Editor
+.vscode/
+.idea/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Logs
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Env / Secrets
+.env
+.env.*
+!.env.example
+
+# Dependencies
+node_modules/
+vendor/
+
+# Build outputs
+dist/
+build/
+out/
+target/
+bin/
+obj/
+
+# Cache
+.cache/
+.tmp/
+temp/
+*.tmp
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Java
+*.class
+*.jar
+*.war
+*.ear
+
+# C# / .NET
+bin/
+obj/
+.vs/
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+.gitignore
+.git
+.agents
+
+# Package lock exceptions
+# 不想锁版本可以取消下面注释
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml

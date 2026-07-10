@@ -1,0 +1,40 @@
+{
+  "manifest_version": 3,
+  "name": "京豆查询工具",
+  "version": "3.2.0",
+  "description": "JingdouQueryTool",
+  "permissions": [],
+  "host_permissions": [
+    "http://newadmin.jpos.jd.com/*",
+    "https://kfuad.jd.com/*",
+    "https://crm.jd.com/*",
+    "https://storage.360buyimg.com/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "http://newadmin.jpos.jd.com/tool/beanList*",
+        "https://crm.jd.com/monitor/monitorCaseInfo/monitorDetail*"
+      ],
+      "js": [
+        "src/config.js",
+        "src/common/utils.js",
+        "src/common/runtime.js",
+        "src/crm/local-exporter.js",
+        "src/crm/source-loader.js",
+        "src/ui/template.js",
+        "src/ui/render.js",
+        "src/ui/panel.js",
+        "src/ui/events.js",
+        "src/bean/query.js",
+        "src/bean/query-kfuad.js",
+        "src/export/csv.js",
+        "content.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "background": {
+    "service_worker": "background.js"
+  }
+}
