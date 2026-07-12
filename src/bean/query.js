@@ -10,6 +10,10 @@ async function runBatch() {
   if (state.running || state.loadingCrm) return;
   if (state.crmData) syncCrmSelectionForRun();
   if (state.rows.length === 0) return;
+  if (!hasRequiredQueryColumns()) {
+    alert('未能识别客户账户列或事件号列，请重新读取CRM数据。');
+    return;
+  }
 
   const form = state.beanListForm || findBeanListForm();
   if (form && !state.beanListForm) state.beanListForm = form;
@@ -95,7 +99,6 @@ async function runBatch() {
     state.running = false;
     renderStats(true);
     updateButtons();
-    els.exportBtn.disabled = state.results.filter(r => r.status === '命中').length === 0;
     const finalText = state.stopped ? '已停止' : '查询完成';
     log(`${finalText}：命中 ${state.stats.hit}，未命中 ${state.stats.noHit}，异常 ${state.stats.error}，跳过 ${state.stats.skipped}。`);
   }

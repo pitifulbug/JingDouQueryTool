@@ -5,7 +5,7 @@ function initJdBeanTool() {
 
   state = createInitialState();
   state.beanListForm = findBeanListForm();
-  state.appMode = shouldUseStandaloneHomePageMode();
+  state.appMode = shouldUseStandaloneHomePageMode() && Boolean(state.beanListForm);
 
   host = document.createElement('div');
   host.id = 'jdbean-tool-host';

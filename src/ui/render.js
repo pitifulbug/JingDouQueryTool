@@ -197,7 +197,7 @@ function applyCrmPersonSelection() {
   state.sourceContext = { mode: 'crm', label: data.label, dateText: data.dateText, personText, count: rows.length };
   renderSourceSummary();
   els.detectStatus.textContent = `${data.dateText}｜${personText}｜${rows.length} 条`;
-  els.startBtn.disabled = rows.length === 0;
+  els.startBtn.disabled = !canStartQuery();
   els.exportBtn.disabled = true;
   log(`${personText}｜${rows.length} 条`);
 }
@@ -238,10 +238,23 @@ function formatSourceContextForLog(ctx) {
   return `${ctx.dateText}｜${ctx.personText}｜${ctx.count} 条`;
 }
 
+function hasRequiredQueryColumns() {
+  return Boolean(state && state.autoDetected && state.autoDetected.autoOk);
+}
+
+function canStartQuery() {
+  return Boolean(state && state.rows && state.rows.length > 0 && hasRequiredQueryColumns());
+}
+
+function hasExportableResults() {
+  return Boolean(state && state.results && state.results.some(item => item.status === '命中'));
+}
+
 function updateButtons() {
   const busy = state.running || state.loadingCrm;
-  els.startBtn.disabled = busy || state.rows.length === 0;
+  els.startBtn.disabled = busy || !canStartQuery();
   els.stopBtn.disabled = !state.running;
+  els.exportBtn.disabled = busy || !hasExportableResults();
   els.loadCrmBtn.disabled = busy;
   els.crmPersonSelect.disabled = busy || !state.crmData;
   if (els.crmDateRange) els.crmDateRange.disabled = busy;

@@ -68,7 +68,7 @@ async function loadCrmSourceData() {
     if (els.crmDateRange) els.crmDateRange.disabled = false;
     updateButtons();
     if (!committed) {
-      els.startBtn.disabled = previousStartDisabled || state.running || !state.rows.length;
+      els.startBtn.disabled = previousStartDisabled || state.running || !canStartQuery();
       els.exportBtn.disabled = previousExportDisabled;
     }
   }
@@ -396,6 +396,7 @@ async function fetchCrmRowsFromDetailUrl(detailUrl, onProgress) {
   let firstParsed = firstTable ? parseCrmMonitorTableObjects(firstTable) : { headers: [], rows: [] };
   let total = getCrmTotalCountFromDoc(firstDoc);
   let pageSize = getCurrentCrmPageSizeFromDoc(firstDoc) || configuredPageSize;
+  let fetchedFirstPage = false;
 
   if (!firstParsed.rows.length || !hasCrmRequiredHeader(firstParsed.headers)) {
     pageSize = configuredPageSize;
@@ -407,11 +408,26 @@ async function fetchCrmRowsFromDetailUrl(detailUrl, onProgress) {
     firstParsed = parseCrmMonitorTableObjects(firstTable);
     total = getCrmTotalCountFromDoc(firstDoc) || total || firstParsed.rows.length;
     pageSize = getCurrentCrmPageSizeFromDoc(firstDoc) || pageSize || firstParsed.rows.length || 100;
+    fetchedFirstPage = true;
   }
 
   total = total || firstParsed.rows.length;
   pageSize = Math.max(1, pageSize || configuredPageSize || 100);
-  const pages = Math.max(1, Math.ceil(total / pageSize));
+  let pages = Math.max(1, Math.ceil(total / pageSize));
+
+  // The initial detail URL can represent any currently selected page. For a
+  // multi-page result set, explicitly load page 1 before assembling all pages.
+  if (pages > 1 && !fetchedFirstPage) {
+    onProgress && onProgress(1, pages, total);
+    const firstHtml = await fetchCrmMonitorPage(params, 1, pageSize, detail.origin);
+    firstDoc = new DOMParser().parseFromString(firstHtml, 'text/html');
+    firstTable = findCrmDataTable(firstDoc);
+    if (!firstTable) throw new Error('CRM第 1 页返回中未找到可识别的数据表格');
+    firstParsed = parseCrmMonitorTableObjects(firstTable);
+    total = getCrmTotalCountFromDoc(firstDoc) || total || firstParsed.rows.length;
+    pageSize = Math.max(1, getCurrentCrmPageSizeFromDoc(firstDoc) || pageSize || firstParsed.rows.length || 100);
+    pages = Math.max(1, Math.ceil(total / pageSize));
+  }
 
   if (pages <= 1 && firstParsed.rows.length >= total) {
     return dedupeCrmRows(firstParsed);

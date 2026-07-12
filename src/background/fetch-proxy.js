@@ -132,11 +132,12 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         headers: normalizeHeaders(opts.headers),
         body,
         credentials,
-        // Redirects must not bypass the target allowlist. The caller can only
-        // issue a new request after the redirected URL is independently checked.
-        redirect: 'error',
+        redirect: 'follow',
         signal: controller.signal
       });
+      // Preserve normal authentication and canonical redirects, but never
+      // expose a response whose final URL falls outside the target allowlist.
+      if (res.url) validateTargetUrl(new URL(res.url), method);
       const text = await res.text();
       sendResponse({
         ok: res.ok,

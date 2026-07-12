@@ -4,6 +4,10 @@ async function runBatchKfuad() {
   if (state.running || state.loadingCrm) return;
   if (state.crmData) syncCrmSelectionForRun();
   if (state.rows.length === 0) return;
+  if (!hasRequiredQueryColumns()) {
+    alert('未能识别客户账户列或事件号列，请重新读取CRM数据。');
+    return;
+  }
 
   const accountCol = els.accountCol.value;
   const eventCol = els.eventCol.value;
@@ -68,6 +72,10 @@ async function runBatchKfuad() {
         await noteRendered(appendNoHitResultsForRows(group.rows));
       }
     } catch (err) {
+      if (isExtensionContextInvalidatedError(err)) {
+        state.stopped = true;
+        throw err;
+      }
       if (state.stopped) return;
       state.stats.done += group.rows.length;
       state.stats.error += group.rows.length;
@@ -85,7 +93,6 @@ async function runBatchKfuad() {
     state.running = false;
     renderStats(true);
     updateButtons();
-    els.exportBtn.disabled = state.results.filter(r => r.status === '命中').length === 0;
     const finalText = state.stopped ? '已停止' : '查询完成';
     log(`${finalText}(kfuad)：命中 ${state.stats.hit}，未命中 ${state.stats.noHit}，异常 ${state.stats.error}，跳过 ${state.stats.skipped}。`);
   }
