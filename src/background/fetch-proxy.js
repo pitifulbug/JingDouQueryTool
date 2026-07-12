@@ -89,6 +89,13 @@ function findAllowedTargetRule(url, method) {
   return rule;
 }
 
+function validateTargetUrl(url, method) {
+  if (url.username || url.password) throw new Error('目标地址不允许包含认证信息');
+  const rule = findAllowedTargetRule(url, method);
+  if (!rule) throw new Error(`不允许访问的地址：${url.origin}${url.pathname}`);
+  return rule;
+}
+
 function isAllowedSender(sender) {
   const rawUrl = sender && (sender.url || sender.tab?.url || '');
   if (!rawUrl) return false;
@@ -111,10 +118,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     const target = new URL(message.url);
     const opts = message.options || {};
     const method = normalizeMethod(opts.method);
-    const rule = findAllowedTargetRule(target, method);
-    if (!rule) {
-      throw new Error(`不允许访问的地址：${target.origin}${target.pathname}`);
-    }
+    const rule = validateTargetUrl(target, method);
 
     const body = normalizeBody(opts.body, method);
     const credentials = resolveCredentialsMode(opts.credentials, target, rule);
@@ -128,7 +132,9 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         headers: normalizeHeaders(opts.headers),
         body,
         credentials,
-        redirect: 'follow',
+        // Redirects must not bypass the target allowlist. The caller can only
+        // issue a new request after the redirected URL is independently checked.
+        redirect: 'error',
         signal: controller.signal
       });
       const text = await res.text();

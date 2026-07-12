@@ -155,20 +155,22 @@ async function queryAllKfuadPages(account, keyword, timeRange) {
 
 function extractKfuadMatchesFromPayload(payload, keyword, beginMs, endMs) {
   const matches = [];
-  let earlyStop = false;
   const content = Array.isArray(payload?.content) ? payload.content : [];
+  const createTimes = [];
   for (const item of content) {
     const createMs = Number(item?.createDate || 0);
+    if (Number.isFinite(createMs) && createMs > 0) createTimes.push(createMs);
     const inRange = createMs >= beginMs && createMs <= endMs;
-    if (!inRange) {
-      if (createMs > 0 && createMs < beginMs) earlyStop = true;
-      continue;
-    }
+    if (!inRange) continue;
     const userVisibleInfo = clean(item?.userVisibleInfo);
     const memo = clean(item?.memo);
     if (!matchesBeanKeyword(userVisibleInfo, keyword) && !matchesBeanKeyword(memo, keyword)) continue;
     matches.push(buildKfuadMatch(item));
   }
+  // Only stop when the entire page is older than the requested range. A mixed
+  // boundary page must not suppress later pages if the upstream ordering is
+  // temporarily unstable.
+  const earlyStop = createTimes.length > 0 && createTimes.every(createMs => createMs < beginMs);
   return { matches, earlyStop };
 }
 

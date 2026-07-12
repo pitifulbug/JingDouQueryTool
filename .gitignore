@@ -2,7 +2,7 @@
 .DS_Store
 Thumbs.db
 desktop.ini
-
+.agents
 # IDE / Editor
 .vscode/
 .idea/

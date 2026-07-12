@@ -392,14 +392,24 @@ function parseBeanCreateTime(v) {
   if (m) {
     const [, y, mo, d, h = '0', mi = '0', se = '0'] = m;
     const dt = new Date(Number(y), Number(mo) - 1, Number(d), Number(h), Number(mi), Number(se));
-    return Number.isFinite(dt.getTime()) ? dt : null;
+    return isExactLocalDateTime(dt, y, mo, d, h, mi, se) ? dt : null;
   }
   m = s.match(/(\d{4})(\d{2})(\d{2})\s*(\d{2})?(\d{2})?(\d{2})?/);
   if (m) {
     const [, y, mo, d, h = '0', mi = '0', se = '0'] = m;
     const dt = new Date(Number(y), Number(mo) - 1, Number(d), Number(h), Number(mi), Number(se));
-    return Number.isFinite(dt.getTime()) ? dt : null;
+    return isExactLocalDateTime(dt, y, mo, d, h, mi, se) ? dt : null;
   }
   const dt = new Date(s.replace(/-/g, '/'));
   return Number.isFinite(dt.getTime()) ? dt : null;
+}
+
+function isExactLocalDateTime(dt, year, month, day, hour, minute, second) {
+  return Number.isFinite(dt.getTime())
+    && dt.getFullYear() === Number(year)
+    && dt.getMonth() === Number(month) - 1
+    && dt.getDate() === Number(day)
+    && dt.getHours() === Number(hour)
+    && dt.getMinutes() === Number(minute)
+    && dt.getSeconds() === Number(second);
 }
