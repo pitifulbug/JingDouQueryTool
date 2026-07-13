@@ -1,0 +1,9 @@
+{
+  "name": "jingdou-query-tool",
+  "version": "3.2.2",
+  "private": true,
+  "scripts": {
+    "test": "node --test",
+    "test:coverage": "node --test --experimental-test-coverage --test-coverage-include=src/**/*.js --test-coverage-lines=60 --test-coverage-branches=65 --test-coverage-functions=60"
+  }
+}

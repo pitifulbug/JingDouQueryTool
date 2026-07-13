@@ -207,7 +207,7 @@ test('kfuad aborts the batch when the extension context is invalidated', async (
   assert.equal(state.running, false);
 });
 
-test('manifest exposes release version 3.2.1', () => {
+test('manifest exposes release version 3.2.2', () => {
   const manifest = JSON.parse(fs.readFileSync(path.join(root, 'manifest.json'), 'utf8'));
-  assert.equal(manifest.version, '3.2.1');
+  assert.equal(manifest.version, '3.2.2');
 });
